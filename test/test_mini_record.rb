@@ -10,7 +10,9 @@ describe MiniRecord do
       conn.tables.each { |table| silence_stream(STDERR) { conn.execute "DROP TABLE IF EXISTS #{table}" } }
     end
 
-    ActiveRecord::Base.descendants.each { |klass| Object.send(:remove_const, klass.to_s) if Object.const_defined?(klass.name.to_s) }
+    ActiveRecord::Base.descendants.each { |klass|
+      Object.send(:remove_const, klass.to_s) if Object.const_defined?(klass.name.to_s) && klass.to_s != "ActiveRecord::SchemaMigration"
+}
     ActiveSupport::DescendantsTracker.direct_descendants(ActiveRecord::Base).clear
   end
 
