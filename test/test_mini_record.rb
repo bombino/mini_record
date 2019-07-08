@@ -143,7 +143,7 @@ describe MiniRecord do
     assert_includes Foo.db_indexes, 'by_customer'
     # Run auto_upgrade! again and ensure no statements issued.
     Foo.auto_upgrade!
-    refute_match /schema\s+change/, Foo.queries
+    refute_match(/schema\s+change/, Foo.queries)
   end
 
   it 'does not add already defined composite indexes' do
@@ -158,7 +158,7 @@ describe MiniRecord do
     assert_includes Foo.db_indexes, 'by_region_and_customer'
     # Run auto_upgrade! again and ensure no statements issued.
     Foo.auto_upgrade!
-    refute_match /schema\s+change/, Foo.queries
+    refute_match(/schema\s+change/, Foo.queries)
   end
 
   it 'supports indexes with symbols for names' do
@@ -171,7 +171,7 @@ describe MiniRecord do
     assert_includes Foo.db_indexes, 'idx_for_some_field'
     # Run auto_upgrade! again and ensure no statements issued.
     Foo.auto_upgrade!
-    refute_match /schema\s+change/, Foo.queries
+    refute_match(/schema\s+change/, Foo.queries)
   end
 
   it 'works with STI' do
@@ -252,10 +252,10 @@ describe MiniRecord do
       col :name, :as => "ENUM('foo','bar')"
     end
     Foo.auto_upgrade!
-    assert_match /ENUM/, Foo.queries
+    assert_match(/ENUM/, Foo.queries)
 
     Foo.auto_upgrade!
-    refute_match /schema\s+change/, Foo.queries
+    refute_match(/schema\s+change/, Foo.queries)
     assert_equal %w[id name], Foo.db_columns
     assert_equal %w[id name], Foo.schema_columns
 
@@ -704,10 +704,10 @@ describe MiniRecord do
       key :string, :limit => 100
     end
     Foo.auto_upgrade!
-    assert_match /CREATE TABLE/, Foo.queries
+    assert_match(/CREATE TABLE/, Foo.queries)
 
     Foo.auto_upgrade!
-    refute_match /alter/i, Foo.queries
+    refute_match(/alter/i, Foo.queries)
 
     # According to this:
     # https://github.com/rails/rails/blob/master/activerecord/lib/active_record/connection_adapters/abstract_mysql_adapter.rb#L476-487
@@ -716,17 +716,17 @@ describe MiniRecord do
     case conn.adapter_name
     when /sqlite/i
       # In sqlite there is a difference between limit: 4 and limit: 11
-      assert_match 'foos.number#limit', Foo.queries
+      assert_match('foos.number#limit', Foo.queries)
       assert_equal 4, Foo.schema_fields[:number].limit
       assert_equal 4, Foo.db_fields[:number].limit
     when /mysql/i
       # In mysql according to this: http://goo.gl/bjZE7 limit: 4 is same of limit:11
-      refute_match /schema\s+change/, Foo.queries
+      refute_match(/schema\s+change/, Foo.queries)
       assert_equal 4, Foo.schema_fields[:number].limit
       assert_equal 4, Foo.db_fields[:number].limit
     when /postgres/i
       # In postgres limit: 4 will be translated to nil
-      assert_match /ALTER COLUMN "number" TYPE integer$/, Foo.queries
+      assert_match(/ALTER COLUMN "number" TYPE integer$/, Foo.queries)
       assert_equal   4, Foo.schema_fields[:number].limit
       assert_equal nil, Foo.db_fields[:number].limit
     end
@@ -745,10 +745,10 @@ describe MiniRecord do
       key :string, :limit => 100
     end
     Foo.auto_upgrade!
-    assert_match /CREATE TABLE/, Foo.queries
+    assert_match(/CREATE TABLE/, Foo.queries)
 
     Foo.auto_upgrade!
-    refute_match /alter/i, Foo.queries
+    refute_match(/alter/i, Foo.queries)
 
     # According to this:
     # https://github.com/rails/rails/blob/master/activerecord/lib/active_record/connection_adapters/abstract_mysql_adapter.rb#L476-487
@@ -757,17 +757,17 @@ describe MiniRecord do
     case conn.adapter_name
     when /sqlite/i
       # In sqlite there is a difference between limit: 4 and limit: 11
-      assert_match Foo.queries, ""
+      assert_match(Foo.queries, "")
       assert_equal nil, Foo.db_fields[:number].limit
       assert_equal 4, Foo.schema_fields[:number].limit
     when /mysql/i
       # In mysql according to this: http://goo.gl/bjZE7 limit: 4 is same of limit:11
-      refute_match /schema\s+change/, Foo.queries
+      refute_match(/schema\s+change/, Foo.queries)
       assert_equal nil, Foo.db_fields[:number].limit
       assert_equal 4, Foo.schema_fields[:number].limit
     when /postgres/i
       # In postgres limit: 4 will be translated to nil
-      assert_match Foo.queries, ""
+      assert_match(Foo.queries, "")
       assert_equal nil, Foo.db_fields[:number].limit
       assert_equal 4, Foo.schema_fields[:number].limit
     end
@@ -775,7 +775,7 @@ describe MiniRecord do
     # Change limit to string
     Foo.key :string, :limit => 255
     Foo.auto_upgrade!
-    refute_match /schema\s+change/, Foo.queries
+    refute_match(/schema\s+change/, Foo.queries)
     assert_equal 100, Foo.db_fields[:string].limit
   end
 
@@ -821,17 +821,17 @@ describe MiniRecord do
     # Same as above
     Foo.key :string, :null => true
     Foo.auto_upgrade!
-    refute_match /alter/i, Foo.queries
+    refute_match(/alter/i, Foo.queries)
     assert Foo.db_fields[:string].null
 
     Foo.key :string, :null => nil
     Foo.auto_upgrade!
-    refute_match /alter/i, Foo.queries
+    refute_match(/alter/i, Foo.queries)
     assert Foo.db_fields[:string].null
 
     Foo.key :string, :null => false
     Foo.auto_upgrade!
-    assert_match /foos.string#null/i, Foo.queries
+    assert_match(/foos.string#null/i, Foo.queries)
     refute Foo.db_fields[:string].null
   end
 
@@ -846,17 +846,17 @@ describe MiniRecord do
     # Same as above
     Foo.key :string, :null => true
     Foo.auto_upgrade!
-    refute_match /alter/i, Foo.queries
+    refute_match(/alter/i, Foo.queries)
     assert Foo.db_fields[:string].null
 
     Foo.key :string, :null => nil
     Foo.auto_upgrade!
-    refute_match /alter/i, Foo.queries
+    refute_match(/alter/i, Foo.queries)
     assert Foo.db_fields[:string].null
 
     Foo.key :string, :null => false
     Foo.auto_upgrade!
-    assert_match "", Foo.queries
+    assert_match("", Foo.queries)
     assert Foo.db_fields[:string].null
   end
 
@@ -874,7 +874,7 @@ describe MiniRecord do
 
     Foo.field :currency, :as => :decimal, :precision => 4, :scale => 2, :limit => 5
     Foo.auto_upgrade!
-    assert_match /foos.currency#limit/i, Foo.queries
+    assert_match(/foos.currency#limit/i, Foo.queries)
     assert_equal 4, Foo.db_fields[:currency].precision
     assert_equal 2, Foo.db_fields[:currency].scale
   end
@@ -889,11 +889,11 @@ describe MiniRecord do
     assert_equal 2, Foo.db_fields[:currency].scale
 
     Foo.auto_upgrade!
-    refute_match /alter/i, Foo.queries
+    refute_match(/alter/i, Foo.queries)
 
     Foo.field :currency, :as => :decimal, :precision => 4, :scale => 2, :limit => 5
     Foo.auto_upgrade!
-    assert_match "", Foo.queries
+    assert_match("", Foo.queries)
     assert_equal 8, Foo.db_fields[:currency].precision
     assert_equal 2, Foo.db_fields[:currency].scale
   end
@@ -943,7 +943,7 @@ describe MiniRecord do
       field :currency, :limit => 3
     end
     Foo.auto_upgrade!
-    assert_match /CREATE TABLE/, Foo.queries
+    assert_match(/CREATE TABLE/, Foo.queries)
 
     Foo.create :currency => 'USD'
 
@@ -952,13 +952,13 @@ describe MiniRecord do
 
     Foo.auto_upgrade!
 
-    assert_match /foos.currency to currency_iso/i, Foo.queries
+    assert_match(/foos.currency to currency_iso/i, Foo.queries)
 
     foo = Foo.first
     assert_equal 'USD', foo.currency_iso
 
     Foo.auto_upgrade!
-    assert_match '', Foo.queries
+    assert_match('', Foo.queries)
 
   end
 
@@ -968,7 +968,7 @@ describe MiniRecord do
       field :currency, :limit => 3
     end
     Foo.auto_upgrade!
-    assert_match /CREATE TABLE/, Foo.queries
+    assert_match(/CREATE TABLE/, Foo.queries)
 
     Foo.create :currency => 'USD'
 
@@ -979,11 +979,11 @@ describe MiniRecord do
 
     case conn.adapter_name
     when /sqlite/i
-      assert_match "", Foo.queries
+      assert_match("", Foo.queries)
     when /mysql/i
-      assert_match "", Foo.queries
+      assert_match("", Foo.queries)
     when /postgres/i
-      assert_match "", Foo.queries
+      assert_match("", Foo.queries)
     end
 
     cols = conn.columns('foos').map(&:name)
@@ -991,7 +991,7 @@ describe MiniRecord do
     assert_includes cols, "currency"
 
     Foo.auto_upgrade!
-    assert_match '', Foo.queries
+    assert_match('', Foo.queries)
 
   end
 
@@ -1000,7 +1000,7 @@ describe MiniRecord do
       create_table options: "extra options"
     end
     Foo.auto_upgrade! rescue nil # eat the exception from invalid options
-    assert_match /CREATE TABLE.* extra options\Z/, Foo.queries
+    assert_match(/CREATE TABLE.* extra options\Z/, Foo.queries)
   end
 
   it 'drops all non-defined tables if there is no table_whitelist' do
@@ -1064,12 +1064,12 @@ describe MiniRecord do
     end
 
     ActiveRecord::Base.auto_upgrade_dry
-    refute_match /\bcreate\b/i, Foo.queries
-    refute_match /\balter\b/i, Foo.queries
+    refute_match(/\bcreate\b/i, Foo.queries)
+    refute_match(/\balter\b/i, Foo.queries)
 
     ActiveRecord::Base.auto_upgrade!
-    assert_match /\bcreate\b/i, Foo.queries
-    refute_match /\balter\b/i, Foo.queries
+    assert_match(/\bcreate\b/i, Foo.queries)
+    refute_match(/\balter\b/i, Foo.queries)
 
     clear_active_record!(:keep_tables => true)
     class Foo < ActiveRecord::Base
@@ -1077,11 +1077,11 @@ describe MiniRecord do
     end
 
     ActiveRecord::Base.auto_upgrade_dry
-    refute_match /\bcreate\b/i, Foo.queries
-    refute_match /\balter\b/i, Foo.queries
+    refute_match(/\bcreate\b/i, Foo.queries)
+    refute_match(/\balter\b/i, Foo.queries)
 
     ActiveRecord::Base.auto_upgrade!
-    assert_match /\bcreate\b/i, Foo.queries
-    assert_match /\balter\b/i, Foo.queries
+    assert_match(/\bcreate\b/i, Foo.queries)
+    assert_match(/\balter\b/i, Foo.queries)
   end
 end
