@@ -962,7 +962,7 @@ describe MiniRecord do
 
   end
 
-  it 'should note rename a column specified by rename_field if destructive = false' do
+  it 'should not rename a column specified by rename_field if destructive = false' do
     MiniRecord.configuration.destructive = false
     class Foo < ActiveRecord::Base
       field :currency, :limit => 3

@@ -83,7 +83,7 @@ module MiniRecord
       end
 
       def create_table_options
-        @create_table_options || (defined?(ApplicationRecord) ? ApplicationRecord.instance_variable_get(:@create_table_options) : nil)
+        @create_table_options || (defined?(ApplicationRecord) ? ApplicationRecord.instance_variable_get(:@create_table_options) : {})
       end
 
       def rename_fields
@@ -104,10 +104,9 @@ module MiniRecord
         end
       end
 
-      def rename_field(*args)
+      def rename_field(*args, **options)
         return unless connection?
 
-        options    = args.extract_options!
         new_name   = options.delete(:new_name)
         old_name   = args.first
         if old_name && new_name
@@ -118,10 +117,9 @@ module MiniRecord
       alias :rename_property  :rename_field
       alias :rename_col       :rename_field
 
-      def field(*args)
+      def field(*args, **options)
         return unless connection?
 
-        options    = args.extract_options!
         type       = options.delete(:as) || options.delete(:type) || :string
         index      = options.delete(:index)
         virtual    = options.delete(:virtual)
@@ -133,10 +131,10 @@ module MiniRecord
           if type.is_a?(String)
             # will be converted in: t.column :type, "ENUM('EMPLOYEE','CLIENT')"
             options.reverse_merge!(:limit => 0) unless postgresql_limitless_column?(type)
-            table_definition.column(column_name, type, options)
+            table_definition.column(column_name, type, **options)
           else
             # wil be converted in: t.string :name
-            table_definition.send(type, column_name, options)
+            table_definition.send(type, column_name, **options)
           end
 
           # Get the correct column_name i.e. in field :category, :as => :references
@@ -180,7 +178,7 @@ module MiniRecord
         table_definition
       end
 
-      def create_table(*options)
+      def create_table(**options)
         @create_table_options = options
       end
 
@@ -259,7 +257,7 @@ module MiniRecord
             unless foreign_keys.detect { |fk| fk[:options][:column] == column }
               to_table = reflect_on_all_associations.detect { |a| a.foreign_key.to_s==column }.table_name
               logger.warn "[MiniRecord] Adding Foreign Key on #{table_name} to #{to_table}" if logger
-              connection.add_foreign_key(table_name, to_table, options) unless @dry_run
+              connection.add_foreign_key(table_name, to_table, **options) unless @dry_run
               foreign_keys << { :options=> { :column=>column } }
             end
           end
@@ -343,7 +341,7 @@ module MiniRecord
             logger.warn "[MiniRecord] Creating Table #{table_name}" if logger
             unless @dry_run
               connection.table_definition = table_definition
-              connection.create_table(table_name, *create_table_options)
+              connection.create_table(table_name, **create_table_options)
               connection.table_definition = init_table_definition(connection)
             end
           end
@@ -440,7 +438,7 @@ module MiniRecord
                 if changed
                   perform_destructive_action do
                     logger.warn "[MiniRecord] Changing column #{table_name}.#{field} to new type #{new_type}" if logger
-                    connection.change_column table_name, field, new_type, new_attr unless @dry_run
+                    connection.change_column table_name, field, new_type, **new_attr unless @dry_run
                   end
                 end
               end
@@ -476,7 +474,7 @@ module MiniRecord
                 column_type_sql = get_sql_field_type(column)
                 connection.add_column table_name, column.name, "#{column_type_sql} GENERATED ALWAYS AS (#{virtual}) VIRTUAL" unless @dry_run
               else
-                connection.add_column table_name, column.name, column.type.to_sym, options unless @dry_run
+                connection.add_column table_name, column.name, column.type.to_sym, **options unless @dry_run
               end
             end
 
@@ -488,7 +486,7 @@ module MiniRecord
               index_name = (options[:name] || adjusted_index_name).to_s
               unless connection.indexes(table_name).detect { |i| i.name == index_name }
                 logger.warn "[MiniRecord] Adding index #{index_name} #{options[:column].inspect} on #{table_name}" if logger
-                connection.add_index(table_name, options.delete(:column), options) unless @dry_run
+                connection.add_index(table_name, options.delete(:column), **options) unless @dry_run
               end
             end
 
