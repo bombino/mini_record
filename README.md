@@ -5,6 +5,7 @@ MiniRecord is a **micro** extension for the `ActiveRecord` gem.
 
 MiniRecord will allow you to create/edit/manage columns, directly in your **model**.
 
+NOTE: rename\_field does NOT WORK with Ruby 3 yet. Do not use.
 
 ## Features
 
